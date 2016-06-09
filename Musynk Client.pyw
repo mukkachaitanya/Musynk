@@ -1,9 +1,11 @@
-import sys
+import sys,os
 import pyaudio
 import wave
 import thread
 import socket
 from Tkinter import *
+
+
 
 root = Tk()
 
@@ -39,5 +41,9 @@ def buttonPressed():
 B = Button(root, text ="Play", command = buttonPressed)
 B.pack(side=BOTTOM)
 
-root.iconbitmap('images/favicon.ico')
+if os.name == "nt":
+	root.iconbitmap(os.path.dirname(os.path.abspath(__file__)) +'\\images\\favicon.ico')
+else :
+	root.iconbitmap(os.path.dirname(os.path.abspath(__file__)) +'/images/favicon.ico')
+
 root.mainloop()
