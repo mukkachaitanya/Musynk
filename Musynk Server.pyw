@@ -1,6 +1,6 @@
 import socket
 import wave
-import sys
+import sys,os
 import pyaudio
 import thread
 import time
@@ -18,40 +18,39 @@ clientlist = []
 def play(data, w, clientsocket):
 	while data != '':
 		data = w.readframes(CHUNK)
-		for client in clientlist:
-			try:
-				client.send(data)
-			except:
-				pass
+		try:
+			clientsocket.send(data)
+		except:
+			pass
 
 def buttonPressedThread(numclients, songpath):
 	serversocket.listen(numclients)
-	
+
 	try:
 		wf = wave.open(songpath, 'rb')
 	except:
 		return
-		
+
 	data = wf.readframes(CHUNK)
-	
+
 	successLabel=Label(root, text="Launched successfully.")
 	successLabel.pack()
 
 	for i in range(numclients):
 		clientsocket, addr = serversocket.accept()
 		s = str(i+1)+" connected."
-		print s
 		clientlist.append(clientsocket)
-	print 'Playing...'
-	
-	thread.start_new_thread(play, (data, wf, clientsocket, ))
-	
+		thread.start_new_thread(play, (data, wf, clientsocket, ))
+		print 'Playing for %s...'%(clientsocket.gethostname())
+
+	#thread.start_new_thread(play, (data, wf, clientsocket, )) ->	illogical
+
 def buttonPressed():
 	numclients = numclientsEntry.get()
 	songpath = songnameEntry.get()
-	
+	print songpath
 	thread.start_new_thread(buttonPressedThread, (int(numclients), songpath ))
-	
+
 root.minsize(width=300,height=220)
 root.maxsize(width=300,height=220)
 root.wm_title("Musynk Server")
@@ -82,5 +81,9 @@ songnameEntry.pack()
 B = Button(root, text ="Launch", command = buttonPressed)
 B.pack(side=BOTTOM)
 
-root.iconbitmap('images/favicon.ico')
+if os.name == "nt":
+	root.iconbitmap(os.path.dirname(os.path.abspath(__file__)) +'\\images\\favicon.ico')
+else :
+	root.iconbitmap(os.path.dirname(os.path.abspath(__file__)) +'/images/favicon.ico')
+
 root.mainloop()
